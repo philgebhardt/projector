@@ -1,0 +1,10 @@
+ORGANIZATION
+> Create folder structure for ruby files
+> Create utility classes for basic stuff (like input/output)
+
+FEATURES
+> Create function for generating template project file system (main.cpp, header stubs, etc)
+> Create function for generating Makefile from a given project file system
+> Design project object model (prom)
+> ...
+
