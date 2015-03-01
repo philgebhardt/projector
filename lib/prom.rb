@@ -104,6 +104,32 @@ class ProjectListener
    
    end
    
+   def onBuild()
+   
+   end
+   
+   def onClean()
+   
+   end
+   
+end
+
+class MakeListener
+   def onBuild()
+      build()
+   end
+
+   def onClean()
+      clean()
+   end
+   
+   def build()
+      system("make")
+   end
+   
+   def clean()
+      system("make clean")
+   end
 end
 
 class GitProjectListener < ProjectListener
@@ -201,10 +227,25 @@ class ProjectFactory
 	   IOUtils.touch("functions.h")
 	   IOUtils.touch("Makefile")
 	   IOUtils.touch("README.txt")
-	   project.setListeners( [GitProjectListener.new()] )
 	   project.getListeners().each do |listener|
 	      listener.onCreate()
 	   end
+	end
+	
+end
+
+class ProjectBuilder
+
+    def self.build(project = Project.new(Dir.pwd))
+	    project.getListeners().each do |listener|
+		   listener.onBuild()
+		end
+	end
+	
+	def self.clean(project = Project.new(Dir.pwd))
+	    project.getListeners().each do |listener|
+		   listener.onClean()
+		end
 	end
 	
 end
