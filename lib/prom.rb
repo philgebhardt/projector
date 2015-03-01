@@ -32,7 +32,7 @@ class ProjectEntity
    
 end
 
-class ProjectFile > ProjectEntity
+class ProjectFile <  ProjectEntity
 
    def getContent()
       content = nil
@@ -54,7 +54,7 @@ class ProjectFile > ProjectEntity
    
 end 
 
-class ProjectDirectory > ProjectEntity
+class ProjectDirectory < ProjectEntity
 
    @children
    
@@ -90,10 +90,75 @@ class ProjectDirectory > ProjectEntity
    
 end
 
+class ProjectListener
+
+   def onCreate()
+   
+   end
+   
+   def onDelete()
+   
+   end
+   
+   def onInspect()
+   
+   end
+   
+end
+
+class GitProjectListener < ProjectListener
+
+   def onCreate()
+       system("git init")
+	   system("git add -A")
+	   system("git commit -m 'project creation'")
+	   writeConfig()
+   end
+   
+   def onDelete()
+       system("rm -rf .git")
+   end
+   
+   def onInspect()
+       system("git status")
+   end
+   
+   def writeConfig()
+       File.open(".git/config", 'w') do |config|
+		config.puts '[core]
+			repositoryformatversion = 0
+			filemode = false
+			bare = false
+			logallrefupdates = true
+			symlinks = false
+			ignorecase = true
+		[color]
+			status = auto
+
+		[color "branch"]
+			current = yellow black
+			local = yellow
+			remote = magenta
+
+		[color "status"]
+			added = green
+			changed = cyan
+			untracked = magenta
+			deleted = red
+		'
+	   end
+   end
+   
+end
+
 class Project
 
    # The root directory of the project
    @rootDir
+   
+   # Listeners that will invoke stuff when you make a change
+   # (no going to implement for a while)
+   @listeners
    
    # Project name
    @name
@@ -115,11 +180,31 @@ class Project
       @rootDir = dir
    end
    
+   def getListeners()
+      unless @listeners
+	     @listeners = []
+	  end
+	  @listeners
+   end
+   
+   def setListeners(listeners)
+      @listeners = listeners
+   end
+   
 end
 
-class ProjectBuilder
+class ProjectFactory
 
-	@options=nil
-	@rootDir
+	def self.createProject()
+	   project = Project.new(Dir.pwd)
+	   IOUtils.touch("main.cpp")
+	   IOUtils.touch("functions.h")
+	   IOUtils.touch("Makefile")
+	   IOUtils.touch("README.txt")
+	   project.setListeners( [GitProjectListener.new()] )
+	   project.getListeners().each do |listener|
+	      listener.onCreate()
+	   end
+	end
 	
 end
